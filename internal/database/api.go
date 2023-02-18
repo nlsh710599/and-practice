@@ -1,12 +1,15 @@
 package database
 
 import (
+	"errors"
 	"log"
 
 	"github.com/nlsh710599/and-practice/internal/database/model"
 
 	"gorm.io/gorm"
 )
+
+var ErrNumberNotFound = errors.New("number does not exsit")
 
 type RDS interface {
 	CreateTable() error
@@ -51,11 +54,20 @@ func (pg *postgresClient) ReadNumber(valueNames []string) (map[string]string, er
 }
 
 func (pg *postgresClient) UpdateNumber(name string, value string) error {
-	return pg.client.Model(&model.Number{}).
+	res := pg.client.Model(&model.Number{}).
 		Where("name = ?", name).
-		Update("value", value).Error
+		Update("value", value)
+
+	if res.RowsAffected == 0 {
+		return ErrNumberNotFound
+	}
+	return res.Error
 }
 
 func (pg *postgresClient) DeleteNumber(name string) error {
-	return pg.client.Where("name =  ?", name).Delete(&model.Number{}).Error
+	res := pg.client.Where("name =  ?", name).Delete(&model.Number{})
+	if res.RowsAffected == 0 {
+		return ErrNumberNotFound
+	}
+	return res.Error
 }

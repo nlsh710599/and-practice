@@ -2,7 +2,6 @@ package method
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/nlsh710599/and-practice/internal/utils"
@@ -52,6 +51,12 @@ func (ctrl *Controller) Update(args *[]string, reply *int) error {
 }
 
 func (ctrl *Controller) Delete(args *[]string, reply *int) error {
-	log.Println(args)
+	name := (*args)[0]
+	if !utils.ValidName(name) {
+		return ErrInvalidName
+	}
+	if err := ctrl.RDS.DeleteNumber(name); err != nil {
+		return err
+	}
 	return nil
 }

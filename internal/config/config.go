@@ -7,6 +7,8 @@ import (
 )
 
 type Config struct {
+	Port int `default:"8080" split_words:"true"`
+
 	PostgresHost     string `default:"localhost" split_words:"true"`
 	PostgresPort     int    `default:"5432" split_words:"true"`
 	PostgresDatabase string `default:"postgres" split_words:"true"`

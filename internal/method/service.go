@@ -45,11 +45,7 @@ func (ctrl *Controller) Update(args *[]string, reply *int) error {
 	if !utils.IsNumeric(value) {
 		return ErrInvalidValue
 	}
-
 	if err := ctrl.RDS.UpdateNumber(name, value); err != nil {
-		if isDuplicateKey(err) {
-			return ErrCreateDuplicateNumber
-		}
 		return err
 	}
 	return nil

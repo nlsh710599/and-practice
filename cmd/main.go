@@ -2,14 +2,15 @@ package main
 
 import (
 	"log"
-	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
+	"net/http"
+
 	"strconv"
 
+	"github.com/gorilla/rpc/v2"
+	"github.com/gorilla/rpc/v2/json"
 	"github.com/nlsh710599/and-practice/internal/config"
 	"github.com/nlsh710599/and-practice/internal/database"
-	"github.com/nlsh710599/and-practice/internal/method"
+	"github.com/nlsh710599/and-practice/internal/service"
 )
 
 func main() {
@@ -25,25 +26,14 @@ func main() {
 		log.Panicf("Failed to create table: %v", err)
 	}
 
-	ctrl := &method.Controller{RDS: rds}
-	rpc.Register(ctrl)
+	bncs := &service.BigNumberComputationService{RDS: rds}
 
-	tcpAddr, err := net.ResolveTCPAddr("tcp", ":"+strconv.Itoa(config.Get().Port))
-	if err != nil {
-		log.Panicf("Failed to resolve TCP address: %v", err)
+	server := rpc.NewServer()
+	server.RegisterCodec(json.NewCodec(), "application/json")
+	server.RegisterService(bncs, "")
+	http.Handle("/rpc", server)
+
+	if err := http.ListenAndServe("localhost:"+strconv.Itoa(config.Get().Port), nil); err != nil {
+		log.Panicf("Failed to listen and serve: %v", err)
 	}
-
-	listener, err := net.ListenTCP("tcp", tcpAddr)
-	if err != nil {
-		log.Panicf("Failed to init tcp listener: %v", err)
-	}
-
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
-		jsonrpc.ServeConn(conn)
-	}
-
 }

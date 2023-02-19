@@ -1,9 +1,9 @@
-package method
+package service
 
 import (
 	"github.com/nlsh710599/and-practice/internal/database"
 )
 
-type Controller struct {
+type BigNumberComputationService struct {
 	RDS database.RDS
 }

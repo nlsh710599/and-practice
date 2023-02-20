@@ -18,16 +18,16 @@ func isDuplicateKey(err error) bool {
 	return strings.Contains(err.Error(), "23505")
 }
 
-func (ctrl *BigNumberComputationService) Create(r *http.Request, args *CreateRequest, reply *string) error {
-	name := args.Name
-	value := args.Value
+func (bncs *BigNumberComputationService) Create(r *http.Request, args *[]string, reply *string) error {
+	name := (*args)[0]
+	value := (*args)[1]
 	if !utils.ValidName(name) {
 		return ErrInvalidName
 	}
 	if !utils.IsNumeric(value) {
 		return ErrInvalidValue
 	}
-	if err := ctrl.RDS.CreateNumber(name, value); err != nil {
+	if err := bncs.RDS.CreateNumber(name, value); err != nil {
 		if isDuplicateKey(err) {
 			return ErrCreateDuplicateNumber
 		}
@@ -36,7 +36,7 @@ func (ctrl *BigNumberComputationService) Create(r *http.Request, args *CreateReq
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Update(r *http.Request, args *UpdateRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Update(r *http.Request, args *UpdateRequest, reply *string) error {
 	name := args.Name
 	value := args.Value
 	if !utils.ValidName(name) {
@@ -45,29 +45,29 @@ func (ctrl *BigNumberComputationService) Update(r *http.Request, args *UpdateReq
 	if !utils.IsNumeric(value) {
 		return ErrInvalidValue
 	}
-	if err := ctrl.RDS.UpdateNumber(name, value); err != nil {
+	if err := bncs.RDS.UpdateNumber(name, value); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Delete(r *http.Request, args *DeleteRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Delete(r *http.Request, args *DeleteRequest, reply *string) error {
 	name := args.Name
 	if !utils.ValidName(name) {
 		return ErrInvalidName
 	}
-	if err := ctrl.RDS.DeleteNumber(name); err != nil {
+	if err := bncs.RDS.DeleteNumber(name); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Add(r *http.Request, args *AddRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Add(r *http.Request, args *AddRequest, reply *string) error {
 	addend := new(big.Float)
 	summand := new(big.Float)
 	var ok bool
 
-	numMap, err := ctrl.RDS.ReadNumber([]string{args.Addend, args.Summand})
+	numMap, err := bncs.RDS.ReadNumber([]string{args.Addend, args.Summand})
 	if err != nil {
 		return err
 	}
@@ -101,12 +101,12 @@ func (ctrl *BigNumberComputationService) Add(r *http.Request, args *AddRequest, 
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Subtract(r *http.Request, args *SubtractRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Subtract(r *http.Request, args *SubtractRequest, reply *string) error {
 	subtrahend := new(big.Float)
 	minuend := new(big.Float)
 	var ok bool
 
-	numMap, err := ctrl.RDS.ReadNumber([]string{args.Subtrahend, args.Minuend})
+	numMap, err := bncs.RDS.ReadNumber([]string{args.Subtrahend, args.Minuend})
 	if err != nil {
 		return err
 	}
@@ -140,12 +140,12 @@ func (ctrl *BigNumberComputationService) Subtract(r *http.Request, args *Subtrac
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Multiply(r *http.Request, args *MultiplyRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Multiply(r *http.Request, args *MultiplyRequest, reply *string) error {
 	multiplicand := new(big.Float)
 	multiplier := new(big.Float)
 	var ok bool
 
-	numMap, err := ctrl.RDS.ReadNumber([]string{args.Multiplicand, args.Multiplier})
+	numMap, err := bncs.RDS.ReadNumber([]string{args.Multiplicand, args.Multiplier})
 	if err != nil {
 		return err
 	}
@@ -179,12 +179,12 @@ func (ctrl *BigNumberComputationService) Multiply(r *http.Request, args *Multipl
 	return nil
 }
 
-func (ctrl *BigNumberComputationService) Divide(r *http.Request, args *DivideRequest, reply *string) error {
+func (bncs *BigNumberComputationService) Divide(r *http.Request, args *DivideRequest, reply *string) error {
 	dividend := new(big.Float)
 	divisor := new(big.Float)
 	var ok bool
 
-	numMap, err := ctrl.RDS.ReadNumber([]string{args.Dividend, args.Divisor})
+	numMap, err := bncs.RDS.ReadNumber([]string{args.Dividend, args.Divisor})
 	if err != nil {
 		return err
 	}

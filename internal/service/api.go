@@ -18,9 +18,9 @@ func isDuplicateKey(err error) bool {
 	return strings.Contains(err.Error(), "23505")
 }
 
-func (bncs *BigNumberComputationService) Create(r *http.Request, args *[]string, reply *string) error {
-	name := (*args)[0]
-	value := (*args)[1]
+func (bncs *BigNumberComputationService) Create(r *http.Request, args *CreateRequest, reply *string) error {
+	name := args.Name
+	value := args.Value
 	if !utils.ValidName(name) {
 		return ErrInvalidName
 	}
